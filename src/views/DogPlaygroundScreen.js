@@ -10,12 +10,15 @@ function DogPlaygroundScreen() {
     const [xDog, setxDog] = useState(Math.random(0, widthW));
     const [score, setScore] = useState(0)
     const [humanPosition, sethumanPosition] = useState({ x: 0, y: 0 });
+    const [barkingSignal, setBarkingSignal] = useState(0);
     const humanSize = 50;
     const dogRef = useRef();
     const barkingSound = new Audio(dog_barking);
     const dogSize = { width: 75, height: 75 }
+  
 
     // }, [])
+
 
     useEffect(() => {
         setUpMouseListener();
@@ -25,18 +28,18 @@ function DogPlaygroundScreen() {
             clearInterval(loopBarking);
         }
     }, [])
-    
 
 
-    useEffect(() => {
-        
-    }, [humanPosition])
 
-    let initDogPosition = () =>{
-        
+    // useEffect(() => {
+
+    // }, [humanPosition])
+
+    let initDogPosition = () => {
+
         let x = Math.floor(Math.random() * widthW);
         let y = Math.floor(Math.random() * heightW);
-      
+
         //boundary for x
         if (x < 0) x = 0;
         if (x > widthW - dogSize.width) {
@@ -52,12 +55,17 @@ function DogPlaygroundScreen() {
         setyDog(y)
     }
 
-    let loopBarkingDog = () =>{
-        let loopBarking = setInterval(()=>{
-            barkingDog();
+    let loopBarkingDog = () => {
+        let loopBarking = setInterval(() => {
+            setBarkingSignal(prev => prev + 1);
+
         }, 2000)
         return loopBarking
     }
+    useEffect(() => {
+        barkingDog();
+    }, [barkingSignal])
+    
 
     let barkingDog = () => {
         let dogPosition = getPositionAtCenter(dogRef.current);
@@ -68,7 +76,7 @@ function DogPlaygroundScreen() {
         let volumn = (1 - distanceRatio);
         console.log(volumn)
         barkingSound.volume = volumn;
-        // barkingSound.play();
+        barkingSound.play();
     }
 
     function getPositionAtCenter(element) {
@@ -81,25 +89,26 @@ function DogPlaygroundScreen() {
 
     let setUpMouseListener = () => {
         document.addEventListener('mousemove', (e) => {
-            sethumanPosition({x: e.pageX, y: e.pageY});
+            // console.log(e.pageX);
+            sethumanPosition({ x: e.pageX, y: e.pageY });
         });
-        
+
     }
 
     let clickOnPlayground = () => {
         let isTrue = isMouseInsideDog()
-  
+
         if (isTrue) {
             setScore(score + 1);
             initDogPosition();
-        }else{
+        } else {
             dogMoveRoutine();
         }
     }
 
     let isMouseInsideDog = () => {
         let dogEle = dogRef.current.getBoundingClientRect();
-      
+
         return (dogEle.x < humanPosition.x
             && dogEle.x + dogEle.width > humanPosition.x
             && dogEle.y < humanPosition.y
@@ -132,8 +141,8 @@ function DogPlaygroundScreen() {
     }
 
     return (
-        <div id='playground' onClick={()=>clickOnPlayground()}>
-            <div id='dog' ref= {dogRef} style={{
+        <div id='playground' onClick={() => clickOnPlayground()}>
+            <div id='dog' ref={dogRef} style={{
                 position: "absolute",
                 left: `${xDog}px`,
                 top: `${yDog}px`,
